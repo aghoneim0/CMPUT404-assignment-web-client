@@ -83,7 +83,7 @@ class HTTPClient(object):
         data=int(data[1])
         return data
 
-    def GET1(self, url, args=None):
+    def GET(self, url, args=None):
         code = 500
         
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
