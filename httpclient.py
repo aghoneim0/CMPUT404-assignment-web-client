@@ -108,35 +108,7 @@ class HTTPClient(object):
         print body
         code=self.get_code(body) # Replace Code 500 with response code
         return HTTPRequest(code, body)
-
-    def GET(self, url, args=None):
-        code = 500
-        
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        data= self.get_config(url) # Get Host/Port number to connect to 
-        url = data[0]
-        host= data[1]
-        port= data[2]
-        s.connect((host,port))
-        data.extend(["","","",""])
-
-        request=self.get_header('GET',data)
-        print '====================================GET Request================================='
-      
-        s.send(request)
-        body=''
-        
-        
-        buffer = s.recv(1024)
-        body = ''
-        while buffer:
-            body += buffer
-            buffer = s.recv(1024)
-        print '====================================GET Response================================='
-        print body
-        code=self.get_code(body) # Replace Code 500 with response code
-        return HTTPRequest(code, body)        
+       
     def POST(self, url, args=None):
         code = 500
         print url
