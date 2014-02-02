@@ -25,7 +25,9 @@ import re
 import urllib
 
 def help():
-    print "httpclient.py [GET/POST] [URL]\n"
+    print "Without-parameters httpclient.py [GET/POST] [URL]\n"
+    print "OR \n"
+    print "With-parameters httpclient.py [GET/POST] 'login=user,password=21212' [URL]\n"
 
 class HTTPRequest(object):
     def __init__(self, code=200, body=""):
@@ -36,7 +38,7 @@ class HTTPRequest(object):
 class HTTPClient(object):
     
     #Creates the Request to be sent 
-    def get_header(self,method,data):
+    def create_request(self,method,data):
 
         url  = data[0]
         host = data[1]
@@ -60,19 +62,20 @@ class HTTPClient(object):
 
     # Returns the Host/Port number for the socket to connect to 
     def get_config(self, url):
-
         result=[]
         if '127.0.0.1' in url:
             temp  = url.split('/')
             host = temp[2].split(':')[0]
             port = temp[2].split(':')[1]
             del temp[0],temp[0],temp[0]
-            temp = '/'.join(temp)
-            result.extend([temp,host,int(port)])
+            url = '/'.join(temp)
+            result.extend([url,host,int(port)])
         else:
-            print url
+            temp  = url.split('/')
+            del temp[0],temp[0],temp[0]
+            temp = '/'.join(temp)
             host = url.split('/')[2]
-            url=''
+            url=temp
             port=80
             result.extend([url,host,port])
 
@@ -82,6 +85,13 @@ class HTTPClient(object):
         data=data.split(' ')
         data=int(data[1])
         return data
+
+    def create_url_args(self, data):
+        arg=dict()
+        for items in data.split(','):
+            value=items.split('=')
+            arg[value[0]]=value[1]
+        return arg
 
     def GET(self, url, args=None):
         code = 500
@@ -95,9 +105,17 @@ class HTTPClient(object):
         s.connect((host,port))
         data.extend(["","","",""])
 
-        request=self.get_header('GET',data)
+        if args is not None and isinstance(args, basestring):
+            args=self.create_url_args(args)
+            args=urllib.urlencode(args)
+            data[0]=url+'?'+args
+        elif args is not None and isinstance(args,dict):
+            args=urllib.urlencode(args)
+            data[0]=url+'?'+args
+
+        request=self.create_request('GET',data)
         print '====================================GET Request================================='
-      
+        print request
         s.send(request)
         body=''
         buffer = s.recv(1024)
@@ -111,15 +129,19 @@ class HTTPClient(object):
        
     def POST(self, url, args=None):
         code = 500
-        print url
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        data=self.get_config(url) 
+        data=self.get_config(url) # Get Host/Port number to connect to 
         url = data[0]
         host= data[1]
         port= data[2]
-
-        s.connect((host,port)) # Get Host/Port number to connect to 
+        if args is not None and isinstance(args, basestring):
+            args=self.create_url_args(args)
+            args=urllib.urlencode(args)
+        if args is not None and isinstance(args, dict):
+            args=urllib.urlencode(args)
+            
+        s.connect((host,port)) 
        
         if args == None:
 
@@ -128,15 +150,16 @@ class HTTPClient(object):
             	"",""])
 
         else:
-        	args=urllib.urlencode(args)
+
         	data.extend(['Content-Type: application/x-www-form-urlencoded',
         	 'Content-Length: %s' % (len(args)),
         	 	"",
         	 	args,
         	 	"",
         	 	])
-        request=self.get_header('POST',data)
+        request=self.create_request('POST',data)
         print '====================================POST Request================================='
+        print request
         s.send(request)
         buffer = s.recv(1024)
         response=''
@@ -164,8 +187,7 @@ if __name__ == "__main__":
     if (len(sys.argv) <= 1):
         help()
         sys.exit(1)
-    elif (len(sys.argv) == 3):
-        print client.command( sys.argv[2], sys.argv[1] )
+    elif (len(sys.argv) == 4): # The len should be 4 and not 3 httpclient GET ARGS URL
+        print client.command( sys.argv[3], sys.argv[1] ,sys.argv[2]) # Switched the Args   
     else:
-        
-        print client.command( sys.argv[1],command)    
+        print client.command( sys.argv[2],sys.argv[1]) # Switched the Args   
