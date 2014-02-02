@@ -6,8 +6,8 @@ CMPUT404-assignment-web-client
 A Basic Http Client made by Ahmed Ghoneim <br>
 
 To Use HttpClient from the command line : <br>
-	1)Without-parameters httpclient.py [GET/POST] [URL] <br>
-	2)With-parameters httpclient.py [GET/POST] 'login=user,password=21212' [URL] <br>
+	1)Without-parameters :    python httpclient.py [GET/POST] [URL] <br>
+	2)With-parameters    :    python httpclient.py [GET/POST] 'login=user,password=21212' [URL] <br>
 
 
 
